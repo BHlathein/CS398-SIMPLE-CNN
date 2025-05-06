@@ -92,7 +92,7 @@ class OverfittingTracker(BaseCallback):
 
 if __name__ == "__main__":
     
-    timesteps = 1000000
+    timesteps = 20000
     # 1000000 is the optimal
 
     callback = OverfittingTracker()

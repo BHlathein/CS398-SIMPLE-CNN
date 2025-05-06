@@ -1,0 +1,453 @@
+/* General Layout */
+body {
+    font-family: sans-serif;
+    max-width: 700px;
+    margin: auto;
+    padding: 2em;
+}
+
+/* Canvas and Game Board */
+canvas {
+    border: 1px solid black;
+    display: block;
+    margin: 1em auto;
+}
+
+/* Game Options */
+.options {
+    margin-top: 1em;
+}
+
+/* Inventory Display */
+.inventory {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1em;
+}
+
+.inventory div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.inventory img {
+    margin: 2px;
+}
+
+/* Rules Button */
+.rules-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.rules-btn:hover {
+    background-color: #45a049;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: #000;
+}
+
+
+/* Rules Content Styles */
+.rules-section {
+    margin-bottom: 20px;
+}
+
+.rules-section h2 {
+    color: #333;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.rules-section h3 {
+    color: #444;
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+}
+
+.rules-section p {
+    line-height: 1.6;
+    color: #444;
+}
+
+.rules-section ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    line-height: 1.6;
+    color: #444;
+}
+
+
+/* Game Controls */
+.game-controls {
+    margin: 1em 0;
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
+#start-game {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#start-game:hover {
+    background-color: #45a049;
+}
+
+#server-url {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Status Display */
+#status {
+    margin: 1em 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    text-align: center;
+    color: #444;
+}
+
+
+/* Player Type Selection */
+.player-select {
+    margin: 1em 0;
+}
+
+.player-select select {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-left: 8px;
+}
+
+/* Piece Selection */
+.piece-select {
+    margin: 1em 0;
+}
+
+.piece-select select {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-left: 8px;
+}
+
+
+/* Rules Navigation */
+.rules-nav {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 20px 0;
+}
+
+.rules-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.rules-nav a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.rules-nav a:hover {
+    text-decoration: underline;
+}
+
+
+/* Piece Information */
+.piece-info {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.piece-type {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.piece-image {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.piece-type h4 {
+    color: #4CAF50;
+    margin: 10px 0;
+}
+
+.piece-type ul {
+    text-align: left;
+    margin-top: 10px;
+}
+
+
+/* Special Rules Section */
+.special-rules-content {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.special-rules-content h4 {
+    color: #4CAF50;
+    margin: 15px 0 10px 0;
+}
+
+
+/* Section Styling */
+section {
+    margin: 30px 0;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+section:first-of-type {
+    border-top: none;
+}
+
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+
+/* Grid Coordinate System */
+.board-container {
+    position: relative;
+    margin: 2em auto;
+    width: 420px;
+    height: 420px;
+    padding: 30px;
+}
+
+
+/* Coordinate Labels Container */
+.coordinate-labels {
+    position: absolute;
+    display: flex;
+}
+
+/* Horizontal Labels (A-F) */
+.coordinate-labels.horizontal {
+    left: 30px;  /* Align with board start */
+    top: 0;
+    width: 360px; /* Same as board width */
+    height: 30px;
+    justify-content: space-around;
+}
+
+
+/* Vertical Labels (1-6) */
+.coordinate-labels.vertical {
+    flex-direction: column;
+    left: -25px;     
+    top: 48px;       
+    width: 30px;
+    height: 360px;   
+    justify-content: space-around;
+}
+
+
+/* Individual Label Styling */
+.coordinate-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: bold;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;    /* Center vertically */
+    justify-content: center; /* Center horizontally */
+}
+
+
+/* Position the canvas */
+#game-canvas {
+    position: absolute;
+    left: 30px;
+    top: 30px;
+    background-color: white;
+}
+
+/* Add a subtle background to the coordinate labels for better visibility */
+.coordinate-labels .coordinate-label {
+    background-color: #f5f5f5;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* Move Log Styles */
+.move-log-container {
+    margin: 2em auto;
+    max-width: 360px; /* Match board width */
+}
+
+.move-log {
+    height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.move-log-entry {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.move-number {
+    color: #666;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.move-description {
+    color: #333;
+}
+
+.move-effects {
+    margin-top: 4px;
+    margin-left: 24px;
+    font-size: 0.9em;
+}
+
+/* Player-specific colors for regular moves */
+.player-0-move {
+    color: #F07167;  /* Blue for player 0 */
+}
+
+.player-1-move {
+    color: #00AFB9;  /* Red for player 1 */
+}
+
+/* Player-specific colors for booped pieces */
+.special-move.boop.player-0-boop {
+    color: #F07167;  /* Blue for player 0's booped pieces */
+}
+
+.special-move.boop.player-1-boop {
+    color: #00AFB9;  /* Red for player 1's booped pieces */
+}
+
+/* Enhanced Move Log Styles */
+.special-events {
+    margin-left: 20px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.special-move {
+    padding: 2px 0;
+    margin-left: 10px;
+}
+
+.special-move.removal {
+    color: #00AFB9;  /* Red for removals */
+}
+
+.special-move.promotion {
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.special-move.promotion.player-0-promotion {
+    color: #F07167;  /* Blue for player 0's promotions */
+}
+
+.special-move.promotion.player-1-promotion {
+    color: #00AFB9;  /* Red for player 1's promotions */
+}
+
+.special-move.stock {
+    color: #9C27B0;  /* Purple for stock updates */
+}
+
+/* Hover effect for move entries */
+.move-log-entry:hover {
+    background-color: #f0f0f0;
+}
+
+/* Current move highlight */
+.move-log-entry.current {
+    background-color: #e3f2fd;
+}

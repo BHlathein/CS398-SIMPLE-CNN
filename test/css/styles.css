@@ -1,0 +1,15 @@
+@charset "UTF-8";
+@import url('./main.css');
+@import url('./menu.css');
+@import url('./game.css');
+
+/* Define CSS variables globally */
+:root {
+    --primary: #212738;
+    --secondary: #00AFB9;
+    --background: #57C4E5;
+    --accent: #57C4E5;
+    --highlight: #F07167;
+    --text: #2A2A2A;
+    --shadow: rgba(0, 0, 0, 0.1);
+} 

@@ -1,0 +1,167 @@
+:root {
+    --primary: #212738;
+    --secondary: #00AFB9;
+    --background: #57C4E5;
+    --accent: #F9CA63;
+    --highlight: #F07167;
+    --text: #2A2A2A;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background-color: #57C4E5;
+    color: #2A2A2A;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+}
+
+h1, h2, h3, h4 {
+    color: #212738;
+    margin-bottom: 1rem;
+}
+
+button {
+    background-color: #212738;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: #00AFB9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+select {
+    background-color: white;
+    border: 2px solid #F9CA63;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+select:hover, select:focus {
+    border-color: #00AFB9;
+    outline: none;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 2rem;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close-btn {
+    color: var(--text);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+    color: var(--highlight);
+}
+
+.rules-section {
+    background-color: #F9CA63;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+.rules-nav {
+    background-color: #F9CA63;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.rules-nav a {
+    color: #212738;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.rules-nav a:hover {
+    color: #F07167;
+}
+
+/* Rules Section Styles */
+.rules-section ul {
+    list-style-position: inside;
+    margin-left: 2rem;
+    padding-left: 1rem;
+}
+
+.rules-section li {
+    padding: 0.3rem 0;
+}
+
+#basic-rules ul {
+    margin-left: 2.5rem;
+}
+
+#basic-rules li {
+    position: relative;
+    padding-left: 1.5rem;
+    list-style-type: none;
+}
+
+#basic-rules li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #212738;
+}
+
+/* Game Board Styles */
+.board-container {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow);
+    margin: 2rem 0;
+}
+
+canvas {
+    border-radius: 8px;
+}

@@ -1,0 +1,391 @@
+/* Add this at the top of game.css */
+h1 {
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+    width: 100% !important;
+}
+
+/* Game-specific styles */
+canvas {
+    border: 1px solid black;
+    display: block;
+    margin: 1em auto;
+}
+
+.game-controls {
+    margin: 1em 0;
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
+.board-container {
+    position: relative;
+    background-color: white;
+    padding: 2rem 4rem 4rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 0 !important;
+    width: fit-content !important;
+    display: grid;
+    grid-template-columns: 30px repeat(6, 60px);
+    grid-template-rows: 30px repeat(6, 60px);
+    flex-shrink: 0;
+}
+
+.coordinate-labels {
+    display: contents;
+}
+
+.coordinate-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.coordinate-labels.horizontal .coordinate-label {
+    grid-row: 1;
+}
+
+.coordinate-labels.vertical .coordinate-label {
+    grid-column: 1;
+    padding-top: 30px;
+}
+
+#game-canvas {
+    grid-column: 2 / span 6;
+    grid-row: 2 / span 6;
+    z-index: 2;
+    cursor: pointer;
+    background-color: #edf2ef;
+    border: none;
+    margin: 0;
+}
+
+.coordinate-labels .coordinate-label {
+    flex: 1;
+    text-align: center;
+    padding: 5px;
+}
+
+/* Move Log Styles */
+.move-log-container {
+    margin-top: 2em;
+    border: 1px solid #ddd;
+}
+
+.move-log {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 1em;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.move-log-entry {
+    margin: 0;
+    padding: 0.5em;
+    border-bottom: 1px solid #eee;
+}
+
+.move-log-entry:first-child {
+    border-top: 2px solid #ddd;
+    background-color: #f0f0f0;
+}
+
+.move-number {
+    display: inline-block;
+    width: 3em;
+    color: #666;
+    font-weight: bold;
+}
+
+.move-description {
+    margin-left: 0.5em;
+}
+
+.move-effects {
+    margin-left: 3.5em;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Player-specific colors for regular moves */
+.player-0-move {
+    color: #00AFB9 !important;  /* Changed to your desired color */
+}
+
+.player-1-move {
+    color: #F07167;
+}
+
+/* Player-specific colors for booped pieces */
+.special-move.boop.player-0-boop {
+    color: #00AFB9 !important;  /* Changed to your desired color */
+}
+
+.special-move.boop.player-1-boop {
+    color: #F07167;
+}
+
+.special-events {
+    margin-left: 3.5em;
+    font-style: italic;
+    color: #666;
+}
+
+.special-move {
+    margin: 0.25em 0;
+    padding-left: 1em;
+}
+
+.special-move.removal {
+    color: #00AFB9;
+}
+
+.special-move.promotion {
+    color: #9C27B0;
+}
+
+/* Special move colors for promotions */
+.special-move.promotion.player-0-promotion {
+    color: #00AFB9 !important;  /* Changed to your desired color */
+}
+
+.special-move.promotion.player-1-promotion {
+    color: #F07167;
+}
+
+.special-move.stock {
+    color: #FF9800;
+}
+
+.move-log-entry:hover {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}
+
+.move-log-entry.current {
+    background-color: #e3f2fd;
+    border-radius: 4px;
+}
+
+/* Status and Piece Selector */
+#status {
+    text-align: center;
+    font-size: 1.2em;
+    margin: 2rem 0;
+    padding: 1rem;
+    background-color: var(--accent);
+    color: var(--text);
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.piece-select {
+    margin: 0.5rem 0 !important;
+    padding: 0.75rem !important;
+    background-color: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    text-align: center !important;
+}
+
+.piece-select select {
+    margin-left: 0.5em;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Main container for the entire game */
+body {
+    position: relative !important;
+    padding: 2rem !important;
+    display: block !important;
+}
+
+/* Game title and controls container */
+.game-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Main game layout */
+.game-layout {
+    display: grid !important;
+    grid-template-columns: 250px minmax(600px, 1fr) 250px !important;
+    gap: 2rem !important;
+    width: 100% !important;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    align-items: start !important;
+}
+
+/* Player inventory container */
+.player-inventory {
+    background: white !important;
+    padding: 1.5rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    height: fit-content !important;
+    width: 250px !important;
+    position: sticky !important;
+    top: 1rem !important;
+}
+
+/* Player name */
+.player-inventory > strong {
+    display: block !important;
+    margin-bottom: 1rem !important;
+    text-align: center !important;
+}
+
+/* Piece count container */
+.piece-count {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+}
+
+/* Individual piece type container */
+.piece-type {
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    align-items: center !important;
+    gap: 1rem !important;
+}
+
+/* Inventory image styles */
+.inventory-image {
+    width: 32px !important;
+    height: 32px !important;
+    object-fit: contain !important;
+}
+
+/* Piece info container */
+.piece-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+}
+
+/* Piece label and count */
+.piece-label {
+    font-weight: 500 !important;
+    margin: 0 !important;
+    color: black !important;
+}
+
+/* Add this to style the count */
+.piece-info span {
+    color: black !important;
+}
+
+/* Media query for responsive layout */
+@media (max-width: 1200px) {
+    .game-layout {
+        grid-template-columns: 1fr !important;
+        max-width: 800px !important;
+    }
+
+    .player-inventory {
+        width: 100% !important;
+        max-width: 400px !important;
+        margin: 0 auto !important;
+        position: static !important;
+    }
+}
+
+/* Status display styles */
+.status-container {
+    width: 100% !important;
+    max-width: 600px !important;
+    display: flex !important;
+    gap: 1rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.status-box {
+    flex: 1 !important;
+    text-align: center !important;
+    font-size: 1.2em !important;
+    padding: 1rem !important;
+    background-color: var(--accent) !important;
+    color: var(--text) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+#turn-status {
+    background-color: var(--primary) !important;
+    color: white !important;
+}
+
+#position-status {
+    background-color: var(--accent) !important;
+    color: var(--text) !important;
+}
+
+/* Rules button positioning */
+.rules-btn {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    padding: 0.75rem 1.5rem !important;
+    background-color: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.rules-btn:hover {
+    background-color: var(--highlight) !important;
+}
+
+/* Adjust center content to account for removed button */
+.center-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin-bottom: 2rem !important;  /* Add some bottom margin since we removed the button */
+}
+
+.pause-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 140px;
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.pause-btn:hover {
+    background-color: #c0392b;
+}
+
+.pause-btn.paused {
+    background-color: #27ae60;
+}
+
+.pause-btn.paused:hover {
+    background-color: #219a52;
+}

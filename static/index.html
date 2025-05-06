@@ -6,17 +6,21 @@
   <meta charset="UTF-8">
   <title>RL Board Games Portal</title>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython.min.js"></script>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/menu.css">
 </head>
 <body onload="brython()">
-  <h1>RL Board Games Portal</h1>
+  <div class="welcome-container">
+    <h1>RL Board Games Portal</h1>
 
-  <label for="game-select">Choose a game:</label>
-  <select id="game-select">
-    <option value="boop.html">Boop</option>
-    <option value="tictactoe.html">Tic Tac Toe</option>
-  </select>
+    <label for="game-select">Choose a game:</label>
+    <select id="game-select">
+      <option value="boop.html">Boop</option>
+      <option value="tictactoe.html">Tic Tac Toe</option>
+    </select>
 
-  <button onclick="launchGame()">Start Game</button>
+    <button onclick="launchGame()">Start Game</button>
+  </div>
 
   <script>
     function launchGame() {

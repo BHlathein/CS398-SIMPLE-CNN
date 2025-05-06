@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Boop!</title>
+    <script type="text/javascript" 
+        src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython.min.js">
+    </script>
+    <script type="text/javascript" 
+        src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython_stdlib.js">
+    </script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/game.css">
+    <style>
+        .board-container {
+            position: relative;
+            background-color: white !important;
+            padding: 2rem 5rem 5rem 2rem !important;  /* Reduced from 8rem to 6rem */
+            border-radius: 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            margin: 2rem auto !important;
+            width: fit-content !important;
+        }
+    </style>
+</head>
+<body onload="brython()">
+    <h1>Boop!</h1>
+
+    <!-- Hidden controls for game configuration -->
+    <div style="display: none;">
+        <label for="server-url">Server URL:</label>
+        <input type="text" id="server-url" value="http://localhost:8001">
+        <select id="player-0-type">
+            <option value="human">Human</option>
+            <option value="ai">AI</option>
+        </select>
+        <select id="player-1-type">
+            <option value="human">Human</option>
+            <option value="ai">AI</option>
+        </select>
+    </div>
+
+    <div class="game-layout">
+        <!-- Left Column -->
+        <div class="player-inventory" id="player-0-inventory">
+            <strong>Player 0</strong>
+            <div class="piece-count">
+                <div class="piece-type">
+                    <img src="/images/kitten_a.png" alt="Kitten" class="inventory-image">
+                    <div class="piece-info">
+                        <div class="piece-label">Kitten</div>
+                        <span id="p0-kittens">0</span>
+                    </div>
+                </div>
+                <div class="piece-type">
+                    <img src="/images/cat_a.png" alt="Cat" class="inventory-image">
+                    <div class="piece-info">
+                        <div class="piece-label">Cat</div>
+                        <span id="p0-cats">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Column -->
+        <div class="center-content">
+            <div class="status-container">
+                <div id="turn-status" class="status-box">Waiting for game to start...</div>
+                <div id="position-status" class="status-box">Position: --</div>
+            </div>
+
+            <div class="piece-select">
+                <label>Piece:
+                    <select id="piece-type">
+                        <option value="0">Kitten</option>
+                        <option value="1">Cat</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="board-container">
+                <div class="coordinate-labels horizontal"></div>
+                <div class="coordinate-labels vertical"></div>
+                <canvas id="game-canvas" width="360" height="360"></canvas>
+            </div>
+
+            <div class="move-log-container">
+                <h3>Move History</h3>
+                <div id="move-log" class="move-log"></div>
+            </div>
+
+            <button id="rules-btn" class="rules-btn">Game Rules</button>
+            <button id="pause-btn" class="pause-btn" style="display: none;">Pause AI</button>
+        </div>
+
+        <!-- Right Column -->
+        <div class="player-inventory" id="player-1-inventory">
+            <strong>Player 1</strong>
+            <div class="piece-count">
+                <div class="piece-type">
+                    <img src="/images/kitten_b.png" alt="Kitten" class="inventory-image">
+                    <div class="piece-info">
+                        <div class="piece-label">Kitten</div>
+                        <span id="p1-kittens">0</span>
+                    </div>
+                </div>
+                <div class="piece-type">
+                    <img src="/images/cat_b.png" alt="Cat" class="inventory-image">
+                    <div class="piece-info">
+                        <div class="piece-label">Cat</div>
+                        <span id="p1-cats">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-rules" class="close-btn">&times;</span>
+            
+            <div class="rules-section">
+                <h2>Boop - Game Rules</h2>
+                
+                <div class="rules-nav">
+                    <ul>
+                        <li><a href="#overview">Overview</a></li>
+                        <li><a href="#pieces">Pieces</a></li>
+                        <li><a href="#basic-rules">Basic Rules</a></li>
+                        <li><a href="#special-rules">Special Rules</a></li>
+                        <li><a href="#winning">Winning</a></li>
+                    </ul>
+                </div>
+
+                <section id="overview">
+                    <h3>Overview</h3>
+                    <p>Boop is a strategic board game where players compete to align three cats while managing their kittens and cats on a 6x6 board.</p>
+                </section>
+
+                <section id="pieces">
+                    <h3>Pieces</h3>
+                    <div class="piece-info">
+                        <div class="piece-type">
+                            <img src="/images/kitten_a.png" alt="Kitten" class="piece-image">
+                            <h4>Kittens</h4>
+                            <ul>
+                                <li>Basic game pieces</li>
+                                <li>Each player starts with 8 kittens</li>
+                                <li>Can boop other kittens</li>
+                                <li>Cannot boop cats</li>
+                            </ul>
+                        </div>
+                        <div class="piece-type">
+                            <img src="/images/cat_a.png" alt="Cat" class="piece-image">
+                            <h4>Cats</h4>
+                            <ul>
+                                <li>Upgraded pieces</li>
+                                <li>Created when 3 kittens align</li>
+                                <li>Each cat in that line turns into a cat</li>
+                                <li>Can boop both kittens and cats</li>
+                                <li>Three aligned cats wins the game</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="basic-rules">
+                    <h3>Basic Rules</h3>
+                    <ul>
+                        <li>Players take turns placing pieces on the board</li>
+                        <li>When a piece is placed next to other pieces, it "boops" them</li>
+                        <li>Booped pieces move one space away from the booping piece</li>
+                        <li>If a piece is booped off the board, it returns to the player's stock</li>
+                        <li>Players must place all their kittens before using cats</li>
+                    </ul>
+                </section>
+
+                <section id="special-rules">
+                    <h3>Special Rules</h3>
+                    <div class="special-rules-content">
+                        <h4>Kitten Promotion</h4>
+                        <p>When three kittens are aligned (horizontally, vertically, or diagonally), they are promoted to cats and return to the player's stock.</p>
+                        
+                        <h4>Booping Mechanics</h4>
+                        <ul>
+                            <li>Kittens can only boop other kittens</li>
+                            <li>Cats can boop both kittens and other cats</li>
+                            <li>Multiple pieces can be booped in a single move</li>
+                            <li>Pieces are booped in a straight line away from the placed piece</li>
+                            <li>Booping happens in all eight directions (orthogonal and diagonal)</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="winning">
+                    <h3>Winning the Game</h3>
+                    <p>The game ends when a player successfully aligns three cats in a row (horizontally, vertically, or diagonally). This player is declared the winner!</p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Python modules in correct order -->
+    <script type="text/python">
+    # Set up the Python path and import mechanism
+    import sys
+    from browser import window
+
+    # Add current directory to Python path
+    sys.path.insert(0, '/python')
+
+    # Import our modules with explicit paths
+    import shared  # this will look for /python/shared.py
+    import game    # this will look for /python/game.py
+
+    # Initialize the game
+    game.init_game()
+    </script>
+    
+    <script>
+        // Set player types from localStorage and start game
+        window.addEventListener('load', function() {
+            const p0Type = localStorage.getItem('player0Type') || 'human';
+            const p1Type = localStorage.getItem('player1Type') || 'human';
+            
+            // Set the select elements to the stored values
+            document.getElementById('player-0-type').value = p0Type;
+            document.getElementById('player-1-type').value = p1Type;
+            
+            // Start the game automatically using the Brython-initialized function
+            if (window.__BRYTHON__ && window.__BRYTHON__.builtins && window.init_game) {
+                window.init_game();
+            }
+            
+            // Clear localStorage
+            localStorage.removeItem('player0Type');
+            localStorage.removeItem('player1Type');
+        });
+    </script>
+</body>
+</html>

@@ -5,47 +5,69 @@
   <title>Boop Game</title>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython.min.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython_stdlib.js"></script>
-  <style>
-    body { font-family: sans-serif; max-width: 700px; margin: auto; padding: 2em; }
-    canvas { border: 1px solid black; display: block; margin: 1em auto; }
-    .options { margin-top: 1em; }
-    .inventory { display: flex; justify-content: space-between; margin-top: 1em; }
-    .inventory div { display: flex; flex-direction: column; align-items: center; }
-    .inventory img { margin: 2px; }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body onload="brython()">
   <h1>Boop Game</h1>
 
-  <label for="server-url">Server URL:</label>
-  <input type="text" id="server-url" value="http://localhost:8001">
-  <button id="start-game">Start New Game</button>
+  <div class="game-controls">
+    <label for="server-url">Server URL:</label>
+    <input type="text" id="server-url" value="http://localhost:8001">
+    <button id="start-game">Start New Game</button>
+  </div>
 
   <p id="status">Click "Start New Game" to begin</p>
   <div class="options">
-    <label>Player 0:
-      <select id="player-0-type">
-        <option value="human">Human</option>
-        <option value="ai">AI</option>
-      </select>
-    </label>
-    <br>
-    <label>Player 1:
-      <select id="player-1-type">
-        <option value="human">Human</option>
-        <option value="ai">AI</option>
-      </select>
-    </label>
-    <br>
-    <label>Piece:
-      <select id="piece-type">
-        <option value="0">Kitten</option>
-        <option value="1">Cat</option>
-      </select>
-    </label>
+    <div class="player-select">
+      <label>Player 0:
+        <select id="player-0-type">
+          <option value="human">Human</option>
+          <option value="ai">AI</option>
+        </select>
+      </label>
+    </div>
+    <div class="player-select">
+      <label>Player 1:
+        <select id="player-1-type">
+          <option value="human">Human</option>
+          <option value="ai">AI</option>
+        </select>
+      </label>
+    </div>
+    <div class="piece-select">
+      <label>Piece:
+        <select id="piece-type">
+          <option value="0">Kitten</option>
+          <option value="1">Cat</option>
+        </select>
+      </label>
+    </div>
   </div>
 
-  <canvas id="game-canvas" width="360" height="360"></canvas>
+  <div class="board-container">
+    <!-- Horizontal coordinate labels (A-F) -->
+    <div class="coordinate-labels horizontal">
+        <div class="coordinate-label">A</div>
+        <div class="coordinate-label">B</div>
+        <div class="coordinate-label">C</div>
+        <div class="coordinate-label">D</div>
+        <div class="coordinate-label">E</div>
+        <div class="coordinate-label">F</div>
+    </div>
+    
+    <!-- Vertical coordinate labels (1-6) -->
+    <div class="coordinate-labels vertical">
+        <div class="coordinate-label">1</div>
+        <div class="coordinate-label">2</div>
+        <div class="coordinate-label">3</div>
+        <div class="coordinate-label">4</div>
+        <div class="coordinate-label">5</div>
+        <div class="coordinate-label">6</div>
+    </div>
+    
+    <!-- The game canvas -->
+    <canvas id="game-canvas" width="360" height="360"></canvas>
+  </div>
 
   <div class="inventory" id="inventory-display">
     <div>
@@ -60,9 +82,135 @@
     </div>
   </div>
 
+  <!-- Add this after the inventory div -->
+  <div class="move-log-container">
+    <h3>Move History</h3>
+    <div id="move-log" class="move-log">
+        <!-- Moves will be added here dynamically -->
+    </div>
+  </div>
+
+  <!-- Add the Rules button -->
+  <button id="rules-btn" class="rules-btn">Game Rules</button>
+
+  <!-- Add the Rules Modal -->
+  <div id="rules-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-rules" class="close-btn">&times;</span>
+      
+      <div class="rules-section">
+        <h2>Boop - Game Rules</h2>
+        
+        <div class="rules-nav">
+          <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#pieces">Pieces</a></li>
+            <li><a href="#basic-rules">Basic Rules</a></li>
+            <li><a href="#special-rules">Special Rules</a></li>
+            <li><a href="#winning">Winning</a></li>
+          </ul>
+        </div>
+
+        <section id="overview">
+          <h3>Overview</h3>
+          <p>Boop is a strategic board game where players compete to align three cats while managing their kittens and cats on a 6x6 board.</p>
+        </section>
+
+        <section id="pieces">
+          <h3>Pieces</h3>
+          <div class="piece-info">
+            <div class="piece-type">
+              <img src="kitten_a.png" alt="Kitten" class="piece-image">
+              <h4>Kittens</h4>
+              <ul>
+                <li>Basic game pieces</li>
+                <li>Each player starts with 8 kittens</li>
+                <li>Can boop other kittens</li>
+                <li>Cannot boop cats</li>
+              </ul>
+            </div>
+            <div class="piece-type">
+              <img src="cat_a.png" alt="Cat" class="piece-image">
+              <h4>Cats</h4>
+              <ul>
+                <li>Upgraded pieces</li>
+                <li>Created when 3 kittens align</li>
+                <li>Each cat in that line turns into a cat</li>
+                <li>Can boop both kittens and cats</li>
+                <li>Three aligned cats wins the game</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="basic-rules">
+          <h3>Basic Rules</h3>
+          <ul>
+            <li>Players take turns placing pieces on the board</li>
+            <li>When a piece is placed next to other pieces, it "boops" them</li>
+            <li>Booped pieces move one space away from the booping piece</li>
+            <li>If a piece is booped off the board, it returns to the player's stock</li>
+            <li>Players must place all their kittens before using cats</li>
+          </ul>
+        </section>
+
+        <section id="special-rules">
+          <h3>Special Rules</h3>
+          <div class="special-rules-content">
+            <h4>Kitten Promotion</h4>
+            <p>When three kittens are aligned (horizontally, vertically, or diagonally), they are promoted to a cat and return to the player's stock.</p>
+            
+            <h4>Booping Mechanics</h4>
+            <ul>
+              <li>Kittens can only boop other kittens</li>
+              <li>Cats can boop both kittens and other cats</li>
+              <li>Multiple pieces can be booped in a single move</li>
+              <li>Pieces are booped in a straight line away from the placed piece</li>
+              <li>Booping also can happens in all four directions as well as diagonally</li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="winning">
+          <h3>Winning the Game</h3>
+          <p>The game ends when a player successfully aligns three cats in a row (horizontally, vertically, or diagonally). This player is declared the winner!</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
   <script type="text/python">
 from browser import document, ajax, window, html
 import json
+
+# Add the rules modal functions
+def toggle_rules(ev):
+    modal = document["rules-modal"]
+    current_display = modal.style.display
+    modal.style.display = "block" if (current_display == "none" or not current_display) else "none"
+
+def close_rules(ev):
+    document["rules-modal"].style.display = "none"
+
+def click_outside(ev):
+    modal = document["rules-modal"]
+    if ev.target == modal:
+        modal.style.display = "none"
+
+def handle_keypress(ev):
+    if ev.key == "Escape":
+        document["rules-modal"].style.display = "none"
+
+# Initialize rules modal
+def init_rules():
+    # Add event listeners
+    document["rules-btn"].bind("click", toggle_rules)
+    document["close-rules"].bind("click", close_rules)
+    document["rules-modal"].bind("click", click_outside)
+    document.bind("keydown", handle_keypress)
+    
+    # Set initial state
+    document["rules-modal"].style.display = "none"
 
 game_id = None
 state = {}
@@ -72,31 +220,257 @@ cat_a_img = window.Image.new(); cat_a_img.src = "cat_a.png"
 kitten_b_img = window.Image.new(); kitten_b_img.src = "kitten_b.png"
 cat_b_img = window.Image.new(); cat_b_img.src = "cat_b.png"
 
+move_count = 0
+move_log = []
+
+def get_coordinate_notation(row, col):
+    """Convert row, col to coordinate notation (e.g., 0,0 -> A1)"""
+    return f"{chr(65 + col)}{row + 1}"
+
+def track_boops(row, col, board_before, board_after):
+    """Track pieces that were booped by comparing board states"""
+    booped_pieces = []
+    
+    # Check all adjacent positions (including diagonals)
+    for dr in [-1, 0, 1]:
+        for dc in [-1, 0, 1]:
+            if dr == 0 and dc == 0:
+                continue
+                
+            r, c = row + dr, col + dc
+            if 0 <= r < 6 and 0 <= c < 6:
+                # Check if there was actually a piece here before
+                piece_before = board_before[r][c]
+                if piece_before is None or (piece_before[0] == 0 and piece_before[1] == 0):
+                    continue  # No piece was here before
+                
+                piece_after = board_after[r][c]
+                # Only track if the piece actually moved
+                if piece_before != piece_after:
+                    # Calculate where the piece should have gone
+                    new_r, new_c = r + dr, c + dc
+                    
+                    # Check if piece was booped off the board
+                    if new_r < 0 or new_r >= 6 or new_c < 0 or new_c >= 6:
+                        booped_pieces.append({
+                            'from_pos': (r, c),
+                            'to_pos': None,
+                            'piece_type': 'Cat' if piece_before[2] == 1 else 'Kitten',
+                            'player': 0 if piece_before[0] == 1 else 1
+                        })
+                    else:
+                        # Check if piece moved to the expected position
+                        piece_at_new_pos = board_after[new_r][new_c]
+                        if (piece_at_new_pos is not None and 
+                            ((piece_before[0] == 1 and piece_at_new_pos[0] == 1) or 
+                             (piece_before[1] == 1 and piece_at_new_pos[1] == 1))):
+                            booped_pieces.append({
+                                'from_pos': (r, c),
+                                'to_pos': (new_r, new_c),
+                                'piece_type': 'Cat' if piece_before[2] == 1 else 'Kitten',
+                                'player': 0 if piece_before[0] == 1 else 1
+                            })
+    
+    return booped_pieces
+
+def check_three_in_a_row(board, player):
+    """Check for three kittens in a row that should be promoted"""
+    
+    def is_player_kitten(piece):
+        """Helper function to check if a piece is a kitten belonging to the player"""
+        return (piece is not None and 
+                ((player == 0 and piece[0] == 1) or (player == 1 and piece[1] == 1)) and
+                piece[2] == 0)  # is a kitten
+    
+    # Check horizontal lines
+    for row in range(6):
+        for col in range(4):  # Start positions 0,1,2,3
+            pieces = []
+            # Check exactly 3 pieces
+            if (is_player_kitten(board[row][col]) and
+                is_player_kitten(board[row][col + 1]) and
+                is_player_kitten(board[row][col + 2])):
+                return [(row, col), (row, col + 1), (row, col + 2)]
+
+    # Check vertical lines
+    for row in range(4):  # Start positions 0,1,2,3
+        for col in range(6):
+            if (is_player_kitten(board[row][col]) and
+                is_player_kitten(board[row + 1][col]) and
+                is_player_kitten(board[row + 2][col])):
+                return [(row, col), (row + 1, col), (row + 2, col)]
+
+    # Check diagonal (top-left to bottom-right)
+    for row in range(4):  # Start positions 0,1,2,3
+        for col in range(4):
+            if (is_player_kitten(board[row][col]) and
+                is_player_kitten(board[row + 1][col + 1]) and
+                is_player_kitten(board[row + 2][col + 2])):
+                return [(row, col), (row + 1, col + 1), (row + 2, col + 2)]
+
+    # Check diagonal (top-right to bottom-left)
+    for row in range(4):  # Start positions 0,1,2,3
+        for col in range(2, 6):
+            if (is_player_kitten(board[row][col]) and
+                is_player_kitten(board[row + 1][col - 1]) and
+                is_player_kitten(board[row + 2][col - 2])):
+                return [(row, col), (row + 1, col - 1), (row + 2, col - 2)]
+
+    return None
+
+def track_promotions(board_before, board_after, current_player):
+    """Track kitten promotions"""
+    # Check for three kittens in a row before the move
+    promotions = check_three_in_a_row(board_after, current_player)
+    
+    if promotions:
+        # Verify these positions changed from kittens to cats or empty
+        all_promoted = True
+        for row, col in promotions:
+            piece_before = board_before[row][col]
+            piece_after = board_after[row][col]
+            
+            # Check if the piece was a kitten before and is now either gone or a cat
+            if not (piece_before is not None and piece_before[2] == 0 and  # was a kitten
+                   (piece_after is None or piece_after[2] == 1)):  # is now gone or a cat
+                all_promoted = False
+                break
+        
+        if all_promoted:
+            return promotions
+    
+    return None
+
+def add_move_to_log(player, action_type, row, col, piece_type, board_before, board_after):
+    """Add a move to the move log with proper formatting"""
+    global move_count
+    move_count += 1
+    
+    # Convert coordinates
+    coord = get_coordinate_notation(row, col)
+    
+    # Create move entry
+    move_entry = html.DIV(Class="move-log-entry")
+    
+    # Add move number
+    move_number = html.SPAN(f"{move_count}.", Class="move-number")
+    move_entry <= move_number
+    
+    # Basic move description
+    piece_name = "Cat" if piece_type == 1 else "Kitten"
+    if action_type == 0:
+        action_desc = f"Player {player} places {piece_name} at {coord}"
+    else:
+        action_desc = f"Player {player} removes {piece_name} from {coord}"
+    
+    move_desc = html.SPAN(action_desc, Class=f"move-description player-{player}-move")
+    move_entry <= move_desc
+    
+    effects_container = html.DIV(Class="move-effects")
+    effects_added = False
+    
+    # Track and add boop effects
+    if action_type == 0:  # Only track boops for placements
+        booped_pieces = track_boops(row, col, board_before, board_after)
+        if booped_pieces:
+            effects_added = True
+            for piece in booped_pieces:
+                from_coord = get_coordinate_notation(*piece['from_pos'])
+                effect_text = f"→ {piece['piece_type']} at {from_coord} "
+                if piece['to_pos'] is None:
+                    effect_text += "was booped off the board"
+                else:
+                    to_coord = get_coordinate_notation(*piece['to_pos'])
+                    effect_text += f"was booped to {to_coord}"
+                
+                effect = html.DIV(
+                    effect_text, 
+                    Class=f"special-move boop player-{piece['player']}-boop"
+                )
+                effects_container <= effect
+    
+    # Track and add promotion effects
+    promotions = track_promotions(board_before, board_after, player)
+    if promotions:
+        effects_added = True
+        promotion_coords = [get_coordinate_notation(r, c) for r, c in promotions]
+        promotion_text = f"→ Kittens at {', '.join(promotion_coords)} promoted to Cat"
+        promotion_effect = html.DIV(
+            promotion_text,
+            Class=f"special-move promotion player-{player}-promotion"
+        )
+        effects_container <= promotion_effect
+        
+        # Debug output
+        print(f"Promotion detected for player {player} at positions: {promotion_coords}")
+    
+    # Only add effects container if there were effects
+    if effects_added:
+        move_entry <= effects_container
+    
+    # Add to move log and update display
+    move_log.append(move_entry)
+    update_move_log_display()
+
+def update_move_log_display():
+    """Update the move log display"""
+    log_container = document["move-log"]
+    log_container.clear()
+    
+    # Add all moves
+    for move in move_log:
+        log_container <= move
+        
+    # Scroll to bottom
+    log_container.scrollTop = log_container.scrollHeight
+
+def clear_move_log():
+    """Clear the move log when starting a new game"""
+    global move_count, move_log
+    move_count = 0
+    move_log = []
+    update_move_log_display()
+
 def render_board():
     board = state["board"]
     canvas = document["game-canvas"]
     ctx = canvas.getContext("2d")
     cell_size = 60
+    
+    # Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    for i in range(7):
-        ctx.beginPath()
-        ctx.moveTo(i * cell_size, 0)
-        ctx.lineTo(i * cell_size, canvas.height)
-        ctx.moveTo(0, i * cell_size)
-        ctx.lineTo(canvas.width, i * cell_size)
-        ctx.stroke()
-
+    
+    # Draw grid lines
+    ctx.strokeStyle = "#ccc"
+    ctx.lineWidth = 1
+    
+    # Draw grid squares with subtle background
+    for row in range(6):
+        for col in range(6):
+            x = col * cell_size
+            y = row * cell_size
+            
+            # Add checkerboard pattern for better visibility
+            if (row + col) % 2 == 0:
+                ctx.fillStyle = "#f9f9f9"
+            else:
+                ctx.fillStyle = "#ffffff"
+            ctx.fillRect(x, y, cell_size, cell_size)
+            
+            # Draw grid lines
+            ctx.strokeRect(x, y, cell_size, cell_size)
+    
+    # Draw pieces
     for row in range(6):
         for col in range(6):
             x = col * cell_size
             y = row * cell_size
             cell = board[row][col]
-    
+            
             is_p0 = cell[0] == 1
             is_p1 = cell[1] == 1
             is_cat = cell[2] == 1
-    
+            
             if is_p0:
                 img = cat_a_img if is_cat else kitten_a_img
                 ctx.drawImage(img, x + 5, y + 5, cell_size - 10, cell_size - 10)
@@ -125,6 +499,13 @@ def handle_start_response(req):
         game_id = result["game_id"]
         state = result["state"]
         render_board()
+        # Clear move log for new game
+        clear_move_log()
+        
+        # If player 0 is AI, trigger move automatically
+        if document["player-0-type"].value == "ai":
+            from browser import timer
+            timer.set_timeout(lambda: send_move(None), 1000)
     else:
         document["status"].text = f"Start error: {req.text}"
 
@@ -139,6 +520,13 @@ def handle_move_response(req):
         render_board()
         if result.get("game_over"):
             game_id = None
+        else:
+          # Check if player is AI, if so trigger move automatically
+          current_player = state["current_player"]
+          if document[f"player-{current_player}-type"].value == "ai":
+            # Add delay for clarity
+            from browser import timer
+            timer.set_timeout(lambda: send_move(None), 1000) # 1 second delay
     else:
         document["status"].text = f"Move error: {req.status}"
 
@@ -160,37 +548,96 @@ def send_move(ev):
 
     current_player = state["current_player"]
     if document[f"player-{current_player}-type"].value == "ai":
+        document["status"].text = "AI is thinking..."
         action = None
     else:
-      canvas = document["game-canvas"]
-      cell_size = 60
-      col = ev.offsetX // cell_size
-      row = ev.offsetY // cell_size
-      cell = state["board"][row][col]
-      piece_type = int(document["piece-type"].value)
-      selected = state["board"][row][col]
+        if not ev:  # If no event, this was an AI-triggered move
+            document["status"].text = "Invalid move"
+            return
+            
+        canvas = document["game-canvas"]
+        cell_size = 60
+        
+        # Get click position relative to the canvas
+        rect = canvas.getBoundingClientRect()
+        x = ev.clientX - rect.left
+        y = ev.clientY - rect.top
+        
+        # Calculate grid position
+        col = int(x // cell_size)
+        row = int(y // cell_size)
+        
+        # Validate position is within bounds
+        if not (0 <= row < 6 and 0 <= col < 6):
+            return
+            
+        piece_type = int(document["piece-type"].value)
+        cell = state["board"][row][col]
 
-      # Determine if it's a removal action on own piece
-      is_own_piece = (cell[0] == 1 and current_player == 0) or (cell[1] == 1 and current_player == 1)
-      if is_own_piece:
-          is_cat = cell[2] == 1
-          action_type = 1
-          piece_type = 1 if is_cat else 0
-      else:
-          action_type = 0  # normal place
+        # Store board state before the move
+        board_before = [row[:] for row in state["board"]]
 
-      action = [action_type, row, col, piece_type]
+        # Determine if it's a removal action on own piece
+        is_own_piece = (cell[0] == 1 and current_player == 0) or (cell[1] == 1 and current_player == 1)
+        if is_own_piece:
+            is_cat = cell[2] == 1
+            action_type = 1
+            piece_type = 1 if is_cat else 0
+        else:
+            action_type = 0  # normal place
 
-    data = {"game_id": game_id, "action": action}
-    url = f"{document['server-url'].value}/api/games/boop/move"
-    req = ajax.ajax()
-    req.bind("complete", handle_move_response)
-    req.open("POST", url, True)
-    req.set_header("Content-Type", "application/json")
-    req.send(json.dumps(data))
+        action = [action_type, row, col, piece_type]
+
+        # Send move to server
+        data = {"game_id": game_id, "action": action}
+        url = f"{document['server-url'].value}/api/games/boop/move"
+        
+        def on_complete(req):
+            if req.status == 200:
+                result = json.loads(req.text)
+                add_move_to_log(
+                    player=current_player,
+                    action_type=action_type,
+                    row=row,
+                    col=col,
+                    piece_type=piece_type,
+                    board_before=board_before,
+                    board_after=result["state"]["board"]
+                )
+                handle_move_response(req)
+        
+        req = ajax.ajax()
+        req.bind("complete", on_complete)
+        req.open("POST", url, True)
+        req.set_header("Content-Type", "application/json")
+        req.send(json.dumps(data))
 
 document["start-game"].bind("click", start_game)
 document["game-canvas"].bind("click", send_move)
+
+# Add this at the end of your script
+init_rules()
+
+def handle_mouse_move(ev):
+    canvas = document["game-canvas"]
+    rect = canvas.getBoundingClientRect()
+    x = ev.clientX - rect.left
+    y = ev.clientY - rect.top
+    
+    col = int(x // 60)
+    row = int(y // 60)
+    
+    # Only redraw if within bounds
+    if 0 <= row < 6 and 0 <= col < 6:
+        render_board()  # Redraw the basic board
+        
+        # Highlight the hovered cell
+        ctx = canvas.getContext("2d")
+        ctx.fillStyle = "rgba(0, 0, 0, 0.1)"
+        ctx.fillRect(col * 60, row * 60, 60, 60)
+
+# Add the mouse move handler
+document["game-canvas"].bind("mousemove", handle_mouse_move)
   </script>
 </body>
 </html>

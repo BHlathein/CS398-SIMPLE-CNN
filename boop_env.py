@@ -1,4 +1,4 @@
-# TODO: change to CNN policy! If you want to later use a CNN policy, you’ll need to change the observation format to channel-first (5, 6, 6) and adjust the policy accordingly.
+# TODO: change to CNN policy! If you want to later use a CNN policy, you'll need to change the observation format to channel-first (5, 6, 6) and adjust the policy accordingly.
 
 import gymnasium as gym
 import numpy as np
@@ -52,12 +52,13 @@ class BoopEnv(gym.Env):
 
     def get_state(self):
         return {
-            "board": self.observation.tolist(),  # or a simpler public board
+            "board": self.observation.tolist(),
             "stock": {
-            "0": self.players[0].stock,
-            "1": self.players[1].stock
+                "0": self.players[0].stock,
+                "1": self.players[1].stock
             },
-            "current_player": self.current_player_num
+            "current_player": self.current_player_num,
+            "players": []  # This will be filled by the server
         }
 
     def is_legal(self, action):
