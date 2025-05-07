@@ -1,5 +1,3 @@
-# TODO: change to CNN policy! If you want to later use a CNN policy, you'll need to change the observation format to channel-first (5, 6, 6) and adjust the policy accordingly.
-
 import gymnasium as gym
 import numpy as np
 import random
@@ -26,7 +24,12 @@ class BoopEnv(gym.Env):
         self.rows, self.cols = 6, 6
         self.grid_shape = (self.rows, self.cols)
         self.action_space = gym.spaces.MultiDiscrete([2, self.rows, self.cols, 2])  # action_type, row, col, piece_type
-        self.observation_space = gym.spaces.Box(low=0, high=1, shape=(self.rows, self.cols, 5), dtype=np.float32)
+        # Channel-first format for CNN compatibility
+        self.observation_space = gym.spaces.Box(
+            low=np.zeros((5, self.rows, self.cols), dtype=np.float32),
+            high=np.ones((5, self.rows, self.cols), dtype=np.float32),
+            dtype=np.float32
+        )
         self.reset()
 
     def reset(self, *, seed=None, options=None):
@@ -36,10 +39,10 @@ class BoopEnv(gym.Env):
         self.current_player_num = 0
         self.done = False
         self.turns_taken = 0
-        return self.observation.astype(np.float32), {}
+        return self.get_observation(), {}
 
-    @property
-    def observation(self):
+    def get_observation(self):
+        # Create the observation in channel-first format for CNN
         pos0 = np.array([[1 if isinstance(c, Kitten) and c.player == 0 else 0 for c in row] for row in self.board])
         pos1 = np.array([[1 if isinstance(c, Kitten) and c.player == 1 else 0 for c in row] for row in self.board])
         cats = np.array([[1 if isinstance(c, Kitten) and c.is_cat else 0 for c in row] for row in self.board])
@@ -48,17 +51,18 @@ class BoopEnv(gym.Env):
         stock_p0 = np.full(self.grid_shape, (self.players[0].stock['kitten'] + self.players[0].stock['cat']) / 8.0)
         stock_p1 = np.full(self.grid_shape, (self.players[1].stock['kitten'] + self.players[1].stock['cat']) / 8.0)
 
-        return np.stack([pos0, pos1, cats, stock_p0, stock_p1], axis=-1)
+        # Stack as channels first (for CNN)
+        return np.stack([pos0, pos1, cats, stock_p0, stock_p1], axis=0).astype(np.float32)
 
     def get_state(self):
+        obs = self.get_observation()
         return {
-            "board": self.observation.tolist(),
+            "board": obs.tolist(),
             "stock": {
                 "0": self.players[0].stock,
                 "1": self.players[1].stock
             },
-            "current_player": self.current_player_num,
-            "players": []  # This will be filled by the server
+            "current_player": self.current_player_num
         }
 
     def is_legal(self, action):
@@ -80,7 +84,6 @@ class BoopEnv(gym.Env):
 
         elif action_type == 1:
             # Graduation/removal action
-
             if sum(player.placed.values()) < 8:
                 return False  # can't graduate/remove unless board is full
             
@@ -131,7 +134,6 @@ class BoopEnv(gym.Env):
                                 owner.stock[kind] += 1
                             self.board[r, c] = None
 
-
     def find_three_in_a_row(self, player, only_cats):
         dirs = [(0, 1), (1, 0), (1, 1), (1, -1)]
         matches = []
@@ -150,21 +152,21 @@ class BoopEnv(gym.Env):
                            for pr, pc in positions):
                         matches.extend(positions)
         return matches if matches else None
-
     
     def step(self, action):
         reward = 0.0
 
         player = self.players[self.current_player_num]
 
-        """if not self.is_legal(action):
+        # Re-enabling the illegal action handling
+        if not self.is_legal(action):
             legal_actions = self.legal_actions()
             if legal_actions:
                 action = random.choice(legal_actions)
             else:
                 # No legal actions exist: game ends (very rare edge case)
-                return self.observation.astype(np.float32), 0.0, True, False, {"reason": "no_legal_moves"}
-        """    
+                return self.get_observation(), 0.0, True, False, {"reason": "no_legal_moves"}
+            
         action_type, row, col, piece_type = action
 
         if action_type == 0:
@@ -189,10 +191,10 @@ class BoopEnv(gym.Env):
 
             winning = self.find_three_in_a_row(self.current_player_num, only_cats=True)
             if winning:
-                return self.observation.astype(np.float32), 1.0, True, False, {"winning_positions": winning}
+                return self.get_observation(), 1.0, True, False, {"winning_positions": winning}
 
             self.current_player_num = 1 - self.current_player_num
-            return self.observation.astype(np.float32), reward, False, False, {}
+            return self.get_observation(), reward, False, False, {}
 
         elif action_type == 1:
             # Graduation/removal action (already legal)
@@ -206,11 +208,9 @@ class BoopEnv(gym.Env):
                 player.placed['cat'] -= 1
                 player.stock['cat'] += 1
 
-            return self.observation.astype(np.float32), 0.1, False, False, {"status": "Graduated or removed piece"}
-
+            return self.get_observation(), 0.1, False, False, {"status": "Graduated or removed piece"}
 
     def render(self):
         symbols = lambda k: '.' if k is None else k.symbol()
         print("\n".join(" ".join(symbols(c) for c in row) for row in self.board))
         print(f"Current player: {self.current_player_num}")
-
