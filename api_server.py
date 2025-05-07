@@ -1,11 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from stable_baselines3 import PPO, DQN
+from stable_baselines3 import PPO
 import numpy as np
 import uuid
-from typing import Optional
+from typing import Optional, List, Tuple, Union
 
 from boop_env import BoopEnv
 
@@ -15,7 +14,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.StreamHandler()            # Logs to the terminal
+        logging.StreamHandler()           # Logs to the terminal
     ]
 )
 logger = logging.getLogger(__name__)
@@ -23,75 +22,59 @@ logger = logging.getLogger(__name__)
 # === FastAPI setup ===
 app = FastAPI()
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # === Models ===
+# Load models at startup
+try:
+    boop_model = PPO.load("ppo_boop_cnn_v0")
+    logger.info("Successfully loaded Boop AI model")
+except Exception as e:
+    logger.error(f"Failed to load Boop model: {e}")
+    boop_model = None
+
 games = {
-    "tictactoe": {'env': None,
-                  'model': "tictactoe_dqn" }, # DQN.load
-    "boop": {'env': BoopEnv,
-             'model': PPO.load("ppo_boop_v0") } # ppo_boop/gen_02/v8
-    }
+    "boop": {'env': BoopEnv, 'model': boop_model}
+}
 
 # === Session store ===
 game_sessions = {}
 
 # === Init new game ===
 class NewGameRequest(BaseModel):
-    players: list[str]
+    players: List[str]
 
 @app.post("/api/games/{game}/new")
 def new_game(game: str, config: NewGameRequest):
     if game not in games:
         raise HTTPException(status_code=404, detail=f"Game '{game}' not supported")
-
+    
     game_id = str(uuid.uuid4())
     env = games[game]['env']()
-    env.reset()
-
-    # Store player types in the session
+    obs, _ = env.reset()  # Get observation from reset
+    
     game_sessions[game_id] = {
         "env": env,
         "players": config.players
     }
-    
-    # Get the initial state
     state = env.get_state()
-    # Add player types to the state
-    state["players"] = config.players
-    
-    # Set initial status
-    current_player = state["current_player"]
-    status = f"Player {current_player}'s turn"
-    if config.players[current_player] == "ai":
-        status = "AI is thinking..."
-        
-    return {"game_id": game_id, "state": state, "status": status}
+    return {"game_id": game_id, "state": state, "status": "Game started"}
 
 # === Game move ===
 class MoveRequest(BaseModel):
     game_id: str
-    action: Optional[list[int]]
+    action: Optional[List[int]] = None
 
 @app.post("/api/games/{game}/move")
 def make_move(game: str, request: MoveRequest):
     game_id = request.game_id
     action = request.action
-
+    
     if game_id not in game_sessions:
         raise HTTPException(status_code=400, detail="Invalid game ID")
-
+    
     session = game_sessions[game_id]
     env = session["env"]
     players = session["players"]
-
+    
     if action is None:  # if sends empty action, handle as AI move
         current_player = env.current_player_num
         if players[current_player] != "ai":
@@ -100,81 +83,77 @@ def make_move(game: str, request: MoveRequest):
                 "status": "It's not the AI's turn.",
                 "game_over": False
             }
-
+        
         legal = env.legal_actions()
-        obs = env.observation.reshape(1, *env.observation.shape)
-        model = games[game]["model"]
-        ai_action, _ = model.predict(obs, deterministic=True)
-        
-        # Convert numpy array to list of regular Python integers
-        if isinstance(ai_action, np.ndarray):
-            ai_action = [int(x) for x in ai_action[0]]
-        else:
-            ai_action = [int(x) for x in ai_action]
-            
-        ai_action = tuple(ai_action)
-
-        if ai_action not in legal:
-            ai_action = legal[np.random.choice(len(legal))]
-
-        # Store board state before AI move
-        board_before = env.get_state()["board"]
-        
-        obs, reward, terminated, truncated, info = env.step(ai_action)
-
-        # Convert AI move details to regular Python types
-        action_type, row, col, piece_type = [int(x) for x in ai_action]
-        
-        # Get updated state and ensure all numpy values are converted
-        state = env.get_state()
-        state["players"] = players
-
-        return {
-            "state": state,
-            "status": f"Player {env.current_player_num}'s turn.",
-            "game_over": terminated or truncated,
-            "ai_move": {
-                "action_type": action_type,
-                "row": row,
-                "col": col,
-                "piece_type": piece_type,
-                "board_before": board_before
+        if not legal:
+            return {
+                "state": env.get_state(),
+                "status": "No legal actions available",
+                "game_over": True
             }
-        }
-
+        
+        try:
+            # Get the model's prediction
+            obs = env.get_observation()
+            obs_array = np.expand_dims(obs, axis=0)  # Add batch dimension for model
+            model = games[game]["model"]
+            
+            if model is None:
+                # Fallback to random action if model not loaded
+                ai_action = np.array(legal[np.random.choice(len(legal))])
+            else:
+                # Get model prediction
+                ai_action, _ = model.predict(obs_array, deterministic=True)
+                
+                # Convert to tuple for comparison with legal actions
+                if isinstance(ai_action, np.ndarray):
+                    if ai_action.ndim > 1:
+                        ai_action = ai_action[0]  # Take first element if batched
+                
+                # Check if action is legal, fallback to random if not
+                ai_action_tuple = tuple(int(x) for x in ai_action)
+                if ai_action_tuple not in legal:
+                    ai_action = np.array(legal[np.random.choice(len(legal))])
+            
+            obs, reward, terminated, truncated, info = env.step(ai_action)
+            
+        except Exception as e:
+            logger.error(f"Error during AI move: {e}")
+            # Fallback to random action
+            action = legal[np.random.choice(len(legal))]
+            obs, reward, terminated, truncated, info = env.step(action)
+            
     else:
-        if tuple(action) not in env.legal_actions():
+        # Convert action to tuple for comparison
+        action_tuple = tuple(action)
+        legal_actions = env.legal_actions()
+        
+        if action_tuple not in legal_actions:
             return {
                 "state": env.get_state(),
                 "status": "Invalid action! Try again.",
                 "game_over": False
             }
-
+        
         obs, reward, terminated, truncated, info = env.step(action)
-
-    # When returning state, include player types
-    state = env.get_state()
-    state["players"] = players
     
     if terminated or truncated:
+        winner = 1 - env.current_player_num  # Previous player is the winner
         del game_sessions[game_id]
         return {
-            "state": state,
-            "status": f"Game over! Player {env.current_player_num} wins!",
+            "state": env.get_state(),
+            "status": f"Game over! Player {winner} wins!",
             "game_over": True
         }
-
+    
     return {
-        "state": state,
+        "state": env.get_state(),
         "status": f"Player {env.current_player_num}'s turn.",
         "game_over": False
     }
 
 # === Static file serving ===
-app.mount("/python", StaticFiles(directory="test/python"), name="python")
-app.mount("/css", StaticFiles(directory="test/css"), name="css")
-app.mount("/images", StaticFiles(directory="test/images"), name="images")
-app.mount("/", StaticFiles(directory="test/html", html=True), name="html")
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
     
 if __name__ == "__main__":
     import uvicorn
